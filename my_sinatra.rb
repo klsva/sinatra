@@ -1,41 +1,75 @@
 #запросы API
 require 'sinatra'
+require 'sinatra/base'
 require 'sinatra/namespace'
 
-module MyAppModule
-  class App < Sinatra::Base
-    register Sinatra::Namespace
+#new
+require 'sequel'
+require 'sequel/extensions/seed'
+require 'pg'
+require 'json'
+require 'multi_json'
+
+%w{ controllers models routes }.each{ |dir| Dir.glob("./#{ dir }/*.rb",&method(:require )) }
+
+#подключение к ДБ
+DB = Sequel.connect(
+    adapter: :postgres,
+    database: 'sin_dev',
+    host: 'localhost',
+    password: 'password',
+    user: 'lena',
+    max_connections: 10,
+# logger: Logger.new('log/db.log')
+)
+
+Sequel::Seed.setup :development # Set the environment
+Sequel.extension :seed # Load the extension
+Sequel::Seeder.apply(DB, './seeds') # Apply the seeds/fixtures
+
+
+
+
+#old
+#module MyAppModule
+#  class App < Sinatra::Base
+#    register Sinatra::Namespace
 
     #переадресация
-    get '/' do
+#    get '/' do
       #'Hello My Sinatra - Easy and '
-      redirect to('hello/world')
-    end
+#      redirect to('hello/world')
+#    end
 
     #get "/hello/:name" do
     #  "Sinatra приветствует тебя, #{params[:name]}!"
     #end
 
     #можно использовать регвыражения в запросах
-    get %r{/hello/([\w]+)} do |c|
-      "Hello, #{c}!"
-    end
+ #   get %r{/hello/([\w]+)} do |c|
+ #     "Hello, #{c}!"
+ #   end
 
     #можно использовать маску splat
     #get "/*" do
     #  "I know #{params[:splat]}."
     #end
 
-    get '/say/*/to/*' do
+  #  get '/say/*/to/*' do
 
-    end
+   # end
 
-    namespace '/api/v1' do
-      get '/*' do
-        "I dont find #{params[:splat]}"
-      end
-    end
+  #  get '/jobs.?:format?' do
+      # соответствует "GET /jobs", "GET /jobs.json", "GET /jobs.xml" и т.д.
+   #   'Да, работает этот маршрут!'
+   # end
 
-  end
-end
+ #   namespace '/api/v1' do
+  #    get '/*' do
+   #     "I dont find #{params[:splat]}"
+   #   end
+ #   end
+
+#  end
+#end
 
