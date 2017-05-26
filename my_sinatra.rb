@@ -10,7 +10,6 @@ require 'pg'
 require 'json'
 require 'multi_json'
 
-%w{ controllers models routes }.each{ |dir| Dir.glob("./#{ dir }/*.rb",&method(:require )) }
 
 #подключение к ДБ
 DB = Sequel.connect(
@@ -23,9 +22,25 @@ DB = Sequel.connect(
 # logger: Logger.new('log/db.log')
 )
 
-Sequel::Seed.setup :development # Set the environment
-Sequel.extension :seed # Load the extension
-Sequel::Seeder.apply(DB, './seeds') # Apply the seeds/fixtures
+%w{ controllers models routes }.each{ |dir| Dir.glob("./#{ dir }/*.rb",&method(:require )) }
+
+before do
+  content_type 'application/json'
+end
+
+#корневой маршрут
+get '/' do
+  'Hello My Sinatra - Easy and '
+  redirect to('hello/world')
+end
+
+def collection_to_api(collection)
+  MultiJson.dump(collection.map{ |s| s.to_api })
+end
+
+#Sequel::Seed.setup :development # Set the environment
+#Sequel.extension :seed # Load the extension
+#Sequel::Seeder.apply(DB, './seeds') # Apply the seeds/fixtures
 
 
 

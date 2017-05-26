@@ -49,13 +49,19 @@ namespace :db do
 
   desc "Perform rollback to specified target or full rollback as default"
   task :seed do
-    #seed_file = File.join('./seeds.rb')
-    #load(seed_file) if File.exist?(seed_file)
-    #раньше были в my_sinatra.rb, а здесь были данные сидов
+    puts 'Check: schema_seeds to be clean!'
     Sequel::Seed.setup :development # Set the environment
     Sequel.extension :seed # Load the extension
+    DB = Sequel.connect(
+        adapter: :postgres,
+        database: 'sin_dev',
+        host: 'localhost',
+        password: 'password',
+        user: 'lena',
+        max_connections: 10,
+    # logger: Logger.new('log/db.log')
+    )
     Sequel::Seeder.apply(DB, './seeds') # Apply the seeds/fixtures
-
   end
 
 
